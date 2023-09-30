@@ -13,48 +13,31 @@ let rtcPeerConnection;
 
 // Function to start the video chat
 async function startVideoChat() {
-    // Check if the user is authenticated (you would typically use a server for this)
-    const isAuthenticated = true; // Change this to the result of your authentication check
+    try {
+        localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+        localVideo.srcObject = localStream;
 
-    if (isAuthenticated) {
-        loginContainer.style.display = 'none';
-        videoContainer.style.display = 'block';
+        rtcPeerConnection = new RTCPeerConnection();
 
-        try {
-            localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-            localVideo.srcObject = localStream;
+        // Add local stream to the peer connection
+        localStream.getTracks().forEach(track => rtcPeerConnection.addTrack(track, localStream));
 
-            rtcPeerConnection = new RTCPeerConnection();
+        // Event listener for receiving remote stream
+        rtcPeerConnection.ontrack = (event) => {
+            remoteStream = event.streams[0];
+            remoteVideo.srcObject = remoteStream;
+        };
 
-            // Add local stream to the peer connection
-            localStream.getTracks().forEach(track => rtcPeerConnection.addTrack(track, localStream));
+        // Create and exchange SDP offer/answer (signaling not implemented in this example)
+        const offer = await rtcPeerConnection.createOffer();
+        await rtcPeerConnection.setLocalDescription(offer);
 
-            // Event listener for receiving remote stream
-            rtcPeerConnection.ontrack = (event) => {
-                remoteStream = event.streams[0];
-                remoteVideo.srcObject = remoteStream;
-            };
+        // In a real application, you would send the offer to the other user via a signaling server
+        // and handle the SDP answer accordingly
 
-            // Create and exchange SDP offer/answer
-            const offer = await rtcPeerConnection.createOffer();
-            await rtcPeerConnection.setLocalDescription(offer);
-
-            // Send the offer to the other user (You would typically use a signaling server here)
-            // For simplicity, we'll just log the offer to the console
-            console.log('SDP Offer:', offer);
-
-            // Handle SDP answer from the other user (You would typically use a signaling server here)
-            // For simplicity, we'll assume we received an answer and log it
-            const answer = /* Received SDP Answer */;
-            console.log('SDP Answer:', answer);
-
-            // Set the remote description
-            await rtcPeerConnection.setRemoteDescription(answer);
-        } catch (error) {
-            console.error('Error starting video chat:', error);
-        }
-    } else {
-        alert('Authentication failed. Please check your username and password.');
+        console.log('SDP Offer:', offer);
+    } catch (error) {
+        console.error('Error starting video chat:', error);
     }
 }
 
@@ -64,10 +47,10 @@ loginForm.addEventListener('submit', (e) => {
     const username = usernameInput.value;
     const password = passwordInput.value;
 
-    // Perform user authentication (you would typically use a server for this)
-    // For simplicity, we'll mock authentication here
-    if (username === 'demo' && password === 'password') {
-        startVideoChat();
+    // Mock authentication (replace with server-based authentication)
+    if (username === 'user' && password === 'password') {
+        loginContainer.style.display = 'none';
+        videoContainer.style.display = 'block';
     } else {
         alert('Authentication failed. Please check your username and password.');
     }
