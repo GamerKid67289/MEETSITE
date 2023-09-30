@@ -3,23 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>family meetings</title>
-    <link rel="stylesheet" href="styles.css">
+    <title>Video Chat</title>
+    <style>
+        video {
+            max-width: 100%;
+        }
+    </style>
 </head>
 <body>
-    <header>
-        <h1>Video Chat App</h1>
-        <div id="user-info"></div>
-    </header>
-    
-    <div id="video-container">
-        <!-- Video chat UI goes here -->
-    </div>
-
-    <button id="sign-in-button">Sign in with Google</button>
-    <button id="sign-out-button">Sign out</button>
+    <h1>Video Chat</h1>
+    <video id="localVideo" autoplay muted></video>
+    <video id="remoteVideo" autoplay></video>
+    <button id="startButton">Start Video</button>
+    <button id="stopButton">Stop Video</button>
 
     <script src="app.js"></script>
-    <script src="https://apis.google.com/js/platform.js" async defer></script>
 </body>
 </html>
