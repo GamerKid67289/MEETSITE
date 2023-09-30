@@ -1,14 +1,41 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Video Chat</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
 </head>
 <body>
-    <video id="localVideo" autoplay></video>
-    <video id="remoteVideo" autoplay></video>
-    <button id="startButton">Start Video Chat</button>
-    <button id="stopButton">Stop Video Chat</button>
+    <h1>Video Chat</h1>
+    {% if user %}
+    <p>Welcome, {{ user }}!</p>
+    <a href="/logout">Logout</a>
+    {% else %}
+    <a href="/login">Login with Google</a>
+    {% endif %}
+    <div id="chat">
+        <div id="chat-messages"></div>
+        <input type="text" id="message-input" placeholder="Type your message...">
+        <button id="send-button">Send</button>
+    </div>
+    <script>
+        const socket = io.connect('http://' + document.domain + ':' + location.port);
+        const chatMessages = document.getElementById('chat-messages');
+        const messageInput = document.getElementById('message-input');
+        const sendButton = document.getElementById('send-button');
 
-    <script src="app.js"></script>
+        sendButton.addEventListener('click', () => {
+            const message = messageInput.value;
+            socket.emit('message', { data: message });
+            messageInput.value = '';
+        });
+
+        socket.on('message', (data) => {
+            const messageElement = document.createElement('div');
+            messageElement.innerHTML = `<strong>${data.sender}:</strong> ${data.message}`;
+            chatMessages.appendChild(messageElement);
+        });
+    </script>
 </body>
 </html>
