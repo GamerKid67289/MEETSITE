@@ -16,7 +16,7 @@ webrtc.on('readyToCall', () => {
         const username = usernameInput.value;
 
         if (username) {
-            webrtc.joinRoom('familymeet', (err, roomName) => {
+            webrtc.joinRoom('your-room-name', (err, roomName) => {
                 if (err) {
                     alert('Error joining the room: ' + err);
                 } else {
