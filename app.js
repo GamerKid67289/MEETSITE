@@ -14,12 +14,25 @@ let localStream;
 let remoteStream;
 let rtcPeerConnection;
 
+// Simulated user database (replace with a real database in production)
+const users = [
+    { username: 'user1', password: 'password1' },
+    { username: 'user2', password: 'password2' },
+];
+
+// Function to authenticate a user
+function authenticateUser(username, password) {
+    return users.find(user => user.username === username && user.password === password);
+}
+
 // Function to start the video chat
 async function startVideoChat() {
-    // Check if the user is authenticated (you would typically use a server for this)
-    const isAuthenticated = true; // Change this to the result of your authentication check
+    const username = loginUsernameInput.value;
+    const password = loginPasswordInput.value;
 
-    if (isAuthenticated) {
+    const authenticatedUser = authenticateUser(username, password);
+
+    if (authenticatedUser) {
         loginContainer.style.display = 'none';
         videoContainer.style.display = 'block';
 
@@ -57,15 +70,7 @@ async function startVideoChat() {
 // Event listener for the login form submission
 loginForm.addEventListener('submit', (e) => {
     e.preventDefault();
-    const username = loginUsernameInput.value;
-    const password = loginPasswordInput.value;
-
-    // Mock authentication (replace with server-based authentication)
-    if (username === 'user' && password === 'password') {
-        startVideoChat();
-    } else {
-        alert('Authentication failed. Please check your username and password.');
-    }
+    startVideoChat();
 });
 
 // Event listener for the sign-up form submission
@@ -74,13 +79,23 @@ signupForm.addEventListener('submit', (e) => {
     const username = signupUsernameInput.value;
     const password = signupPasswordInput.value;
 
-    // Mock user registration (replace with server-based registration)
+    // Check if the username already exists
+    if (users.some(user => user.username === username)) {
+        alert('Username already exists. Please choose another username.');
+        return;
+    }
+
+    // Add the new user to the simulated database
+    users.push({ username, password });
+
     alert(`User "${username}" registered successfully.`);
     // You can add code here to save the user's information to a server or database
 
     // Automatically fill in the login form with the new user's credentials
     loginUsernameInput.value = username;
     loginPasswordInput.value = password;
+
+    startVideoChat();
 });
 
 startButton.addEventListener('click', startVideoChat);
