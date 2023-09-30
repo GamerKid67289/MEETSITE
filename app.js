@@ -1,58 +1,56 @@
-const usernameInput = document.getElementById('username');
-const joinButton = document.getElementById('joinButton');
-const videoContainer = document.getElementById('video-container');
 const localVideo = document.getElementById('localVideo');
-const remoteVideosContainer = document.getElementById('remoteVideosContainer');
+const remoteVideo = document.getElementById('remoteVideo');
+const startButton = document.getElementById('startButton');
+const stopButton = document.getElementById('stopButton');
 
 let localStream;
-let rtcPeerConnection;
-let isInitiator = false;
+let peerConnection;
 
-// Function to set up the WebRTC connection
-async function setUpWebRTC() {
-    const configuration = { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] };
+// Function to start the video chat
+async function startVideoChat() {
+    try {
+        localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+        localVideo.srcObject = localStream;
 
-    rtcPeerConnection = new RTCPeerConnection(configuration);
+        const configuration = { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] };
+        peerConnection = new RTCPeerConnection(configuration);
+        localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
 
-    // Add local stream to the peer connection
-    localStream.getTracks().forEach(track => rtcPeerConnection.addTrack(track, localStream));
+        peerConnection.onicecandidate = handleICECandidate;
+        peerConnection.ontrack = handleTrack;
 
-    // Event listener for receiving remote stream
-    rtcPeerConnection.ontrack = (event) => {
-        const remoteVideo = document.createElement('video');
-        remoteVideo.autoplay = true;
-        remoteVideo.srcObject = event.streams[0];
-        remoteVideosContainer.appendChild(remoteVideo);
-    };
+        const offer = await peerConnection.createOffer();
+        await peerConnection.setLocalDescription(offer);
 
-    // Offer/answer exchange (signaling not implemented in this example)
-    if (isInitiator) {
-        const offer = await rtcPeerConnection.createOffer();
-        await rtcPeerConnection.setLocalDescription(offer);
-        // Send the offer to the other user via a signaling server
-        console.log('SDP Offer:', offer);
-    } else {
-        // Handle receiving an offer from the other user via a signaling server
-        // Set the remote description and create an answer
-        // Send the answer back to the other user via the signaling server
+        // Send the offer to the other user through your signaling server (not shown in this example)
+
+    } catch (error) {
+        console.error('Error starting video chat:', error);
     }
 }
 
-joinButton.addEventListener('click', async () => {
-    const username = usernameInput.value;
-
-    if (username) {
-        videoContainer.style.display = 'block';
-
-        try {
-            localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-            localVideo.srcObject = localStream;
-            isInitiator = true; // The first user to join becomes the initiator
-            setUpWebRTC();
-        } catch (error) {
-            console.error('Error starting video chat:', error);
-        }
-    } else {
-        alert('Please enter your name before joining the meeting.');
+// Function to stop the video chat
+function stopVideoChat() {
+    if (localStream) {
+        localStream.getTracks().forEach(track => track.stop());
     }
-});
+    localVideo.srcObject = null;
+    remoteVideo.srcObject = null;
+    if (peerConnection) {
+        peerConnection.close();
+    }
+}
+
+// Function to handle ICE candidate events
+function handleICECandidate(event) {
+    // Send ICE candidate to the other user through your signaling server (not shown in this example)
+}
+
+// Function to handle incoming video tracks
+function handleTrack(event) {
+    remoteVideo.srcObject = event.streams[0];
+}
+
+// Add event listeners for buttons
+startButton.addEventListener('click', startVideoChat);
+stopButton.addEventListener('click', stopVideoChat);
