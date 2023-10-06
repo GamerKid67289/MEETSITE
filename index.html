@@ -1,23 +1,18 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Family meeting</title>
-    <style>
-        video {
-            max-width: 100%;
-        }
-    </style>
+  <title>Advanced Video Chat Site</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <h1>Video Chat</h1>
-    <video id="localVideo" autoplay muted></video>
-    <video id="remoteVideo" autoplay></video>
-    <button id="startButton">Start Video</button>
-    <button id="stopButton">Stop Video</button>
-
-    <script src="/app.js"></script>
-    <link rel="stylesheet" href="/styles.css">
+  <div id="video-chat-container">
+    <video id="self-video"></video>
+    <video id="remote-video"></video>
+  </div>
+  <div id="chat-container">
+    <input type="text" id="chat-input">
+    <button id="send-chat-button">Send</button>
+  </div>
+  <script src="script.js"></script>
 </body>
 </html>
