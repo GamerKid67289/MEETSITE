@@ -1,0 +1,37 @@
+body {
+  margin: 0;
+  padding: 0;
+}
+
+video {
+  width: 100%;
+  height: 100%;
+}
+
+#local-video {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  width: 200px;
+  height: 150px;
+}
+
+#remote-video {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 200px;
+  height: 150px;
+}
+
+#call-btn {
+  position: absolute;
+  bottom: 10px;
+  left: 10px;
+}
+
+#hangup-btn {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+}
