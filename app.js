@@ -1,61 +1,62 @@
-const localVideo = document.getElementById('local-video');
-const startButton = document.getElementById('start-button');
-const stopButton = document.getElementById('stop-button');
+const agoraAppId = '25540f7394b841d29dfe60b86c43a5eb';
+const localStreamContainer = document.getElementById('localStream');
+const remoteStreamContainer = document.getElementById('remoteStreams');
+let client, localStream;
 
-let localStream;
-let peerConnections = [];
-
-startButton.addEventListener('click', startVideoChat);
-stopButton.addEventListener('click', stopVideoChat);
-
-async function startVideoChat() {
-    try {
-        localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-        localVideo.srcObject = localStream;
-
-        // Create a peer connection for each user (in a real application, you'd need a signaling server)
-        // For this example, let's assume there are two other participants
-        const numParticipants = 99999999999;
-        for (let i = 0; i < numParticipants; i++) {
-            const peerConnection = new RTCPeerConnection();
-
-            // Add the local stream to the peer connection
-            localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
-
-            // Listen for remote stream
-            peerConnection.ontrack = event => {
-                const remoteVideo = document.createElement('video');
-                remoteVideo.autoplay = true;
-                remoteVideo.srcObject = event.streams[0];
-                const videoBox = document.createElement('div');
-                videoBox.classList.add('video-box');
-                videoBox.appendChild(remoteVideo);
-                videoBox.innerHTML += `<p>Participant ${i + 1}</p>`;
-                document.getElementById('video-container').appendChild(videoBox);
-            };
-
-            peerConnections.push(peerConnection);
-        }
-    } catch (error) {
-        console.error('Error starting video chat:', error);
-    }
+// Initialize Agora Client
+async function initializeAgoraClient() {
+    client = AgoraRTC.createClient({ mode: 'rtc', codec: 'h264' });
+    await client.init(agoraAppId);
 }
 
-function stopVideoChat() {
-    // Close all peer connections and stop local stream
-    peerConnections.forEach(peerConnection => {
-        peerConnection.close();
+// Join a video chat session
+async function joinVideoChat() {
+    localStream = AgoraRTC.createStream({
+        video: true,
+        audio: true,
     });
-    peerConnections = [];
+    await localStream.init();
 
+    // Play the local video stream
+    localStream.play('localStream');
+
+    // Publish the local stream
+    await client.publish(localStream);
+
+    // Subscribe to remote streams
+    client.on('stream-added', function (evt) {
+        client.subscribe(evt.stream, (err) => {
+            console.log('Subscribe stream failed', err);
+        });
+    });
+
+    // Play the remote video stream
+    client.on('stream-subscribed', function (evt) {
+        const remoteStream = evt.stream;
+        const remoteStreamContainer = document.createElement('div');
+        remoteStreamContainer.id = `remote-${remoteStream.getId()}`;
+        remoteStreamContainer.classList.add('video-container');
+        document.body.appendChild(remoteStreamContainer);
+        remoteStream.play(`remote-${remoteStream.getId()}`);
+    });
+}
+
+// Leave the video chat session
+function leaveVideoChat() {
     if (localStream) {
-        localStream.getTracks().forEach(track => track.stop());
-    }
-    localVideo.srcObject = null;
-
-    // Remove all remote video elements
-    const videoContainer = document.getElementById('video-container');
-    while (videoContainer.firstChild) {
-        videoContainer.removeChild(videoContainer.firstChild);
+        localStream.close();
+        client.unpublish(localStream);
+        const remoteStreams = document.querySelectorAll('.video-container');
+        remoteStreams.forEach((stream) => {
+            stream.innerHTML = '';
+        });
     }
 }
+
+// Event listeners
+window.addEventListener('beforeunload', leaveVideoChat);
+
+// Start the video chat
+initializeAgoraClient()
+    .then(() => joinVideoChat())
+    .catch(console.error);
