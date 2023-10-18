@@ -1,21 +1,13 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Multi-User Video Chat</title>
-    <link rel="stylesheet" type="text/css" href="/style.css">
+    <title>Video Chat App</title>
+    <link rel="stylesheet" type="text/css" href="styles.css">
 </head>
 <body>
-    <div class="container">
-        <h1>Multi-User Video Chat</h1>
-        <div id="video-container">
-            <div class="video-box">
-                <video id="local-video" autoplay muted></video>
-                <p>You</p>
-            </div>
-        </div>
-        <button id="start-button">Start Video Chat</button>
-        <button id="stop-button">Stop Video Chat</button>
-    </div>
-    <script src="/app.js"></script>
+    <div id="localStream" class="video-container"></div>
+    <div id="remoteStreams" class="video-container"></div>
+    <script src="https://cdn.agora.io/sdk/release/AgoraRTCSDK-4.5.1.js"></script>
+    <script src="app.js"></script>
 </body>
 </html>
